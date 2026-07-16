@@ -1,0 +1,8 @@
+mimir_uninstall: false
+endpoint: ""
+secret_access_key: ""
+access_key: ""
+blocks_bucket: ""
+alertmanager_bucket: ""
+ruler_bucket: ""
+insecure: false

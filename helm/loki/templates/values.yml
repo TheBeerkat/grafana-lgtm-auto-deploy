@@ -1,0 +1,98 @@
+loki:
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  ingester:
+    chunk_encoding: snappy
+
+  querier:
+    max_concurrent: 4
+
+  pattern_ingester:
+    enabled: true
+
+  limits_config:
+    allow_structured_metadata: true
+    volume_enabled: true
+
+  storage:
+    type: s3
+    bucketNames:
+      chunks: {{ chunk_bucket }}
+      ruler: {{ ruler_bucket }}
+      admin: {{ admin_bucket }}
+
+    s3:
+      endpoint: {{ endpoint }}
+      secretAccessKey: {{ secret_access_key }}
+      accessKeyId: {{ access_key }}
+      s3ForcePathStyle: true # Leave this as false breaks kubernetes internal dns resolution
+      insecure: {{ allow_insecure_http }}
+      http_config: {}
+
+minio:
+  enabled: false
+
+deploymentMode: Distributed
+
+ingester:
+  replicas: {{ replicas }}
+  zoneAwareReplication:
+    enabled: false
+  # affinity:
+  #   podAntiAffinity:
+  #     type: soft
+
+querier:
+  replicas: {{ replicas }}
+  maxUnavailable: {{ maxunavailable }}
+
+queryFrontend:
+  replicas: {{ replicas }}
+  maxUnavailable: {{ maxunavailable }}
+
+queryScheduler:
+  replicas: {{ replicas }}
+  maxUnavailable: {{ maxunavailable }}
+
+distributor:
+  replicas: {{ replicas }}
+  maxUnavailable: {{ maxunavailable }}
+
+compactor:
+  replicas: {{ replicas }}
+  maxUnavailable: {{ maxunavailable }}
+
+indexGateway:
+  replicas: {{ replicas }}
+  maxUnavailable: {{ maxunavailable }}
+
+# Experimental features
+bloomPlanner:
+  replicas: 0
+bloomBuilder:
+  replicas: 0
+BloomGateway:
+  replicas: 0
+
+# These are for a different loki deployment mode. must be set to 0
+backend:
+  replicas: 0
+read:
+  replicas: 0
+write:
+  replicas: 0
+
+singleBinary:
+  replicas: 0
+
+gateway:
+  service:
+    type: ClusterIP

@@ -1,0 +1,13 @@
+- name: Add the Tempo repository to helm
+  kubernetes.core.helm_repository:
+    name: grafana-community
+    repo_url: https://grafana-community.github.io/helm-charts
+
+- name: Deploy Tempo with helm
+  kubernetes.core.helm:
+    name: tempo
+    chart_ref: grafana-community/tempo-distributed
+    chart_version: 2.25.5
+    values: "{{ lookup('template', 'values.yml') | from_yaml }}"
+    release_namespace: monitoring
+    create_namespace: true

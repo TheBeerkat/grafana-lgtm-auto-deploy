@@ -1,0 +1,10 @@
+- name: DEploy k8smonitoring
+  ansible.builtin.include_tasks:
+    file: "deploy.yml"
+  when: not k8smonitoring_uninstall
+
+- name: Uninstall k8smonitoring
+  ansible.builtin.include_tasks:
+    file: "uninstall.yml"
+  when: k8smonitoring_uninstall
+

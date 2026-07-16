@@ -1,0 +1,9 @@
+- name: Deploy Grafana
+  ansible.builtin.include_tasks:
+    file: "deploy.yml"
+  when: not grafana_uninstall
+
+- name: Uninstall Grafana
+  ansible.builtin.include_tasks:
+    file: "uninstall.yml"
+  when: grafana_uninstall

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: springapp
+management:
+  endpoints:
+    web:
+      exposure:
+        # Expose health, standard metrics, and prometheus endpoints
+        include: health, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s,2s,5s

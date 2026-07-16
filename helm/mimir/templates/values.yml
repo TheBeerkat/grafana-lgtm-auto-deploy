@@ -1,0 +1,47 @@
+minio:
+  enabled: false
+
+mimir:
+  structuredConfig:
+    common:
+      storage:
+        backend: s3
+        s3:
+          endpoint: {{ endpoint }}
+          secret_access_key: {{ secret_access_key }}
+          access_key_id: {{ access_key }}
+          insecure: {{ insecure }}
+
+    blocks_storage:
+      s3:
+        bucket_name: {{ blocks_bucket }}
+    alertmanager_storage:
+      s3:
+        bucket_name: {{ alertmanager_bucket }}
+    ruler_storage:
+      s3:
+        bucket_name: {{ ruler_bucket }}
+
+
+    ingest_storage:
+      enabled: false
+    ingester:
+      push_grpc_method_enabled: true
+      ring:
+        replication_factor: 1
+
+kafka:
+  enabled: false
+
+ingester:
+  replicas: 1
+distributor:
+  replicas: 1
+querier:
+  replicas: 1
+queryFrontend:
+  replicas: 1
+storeGateway:
+  replicas: 1
+compactor:
+  replicas: 1

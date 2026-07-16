@@ -1,0 +1,5 @@
+- name: Uninstall Grafana with helm
+  kubernetes.core.helm:
+    name: grafana
+    release_namespace: monitoring
+    state: absent

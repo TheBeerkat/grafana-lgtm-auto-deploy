@@ -1,0 +1,5 @@
+---
+grafana_url: "http://localhost:3000"
+grafana_api_key: "ey..."
+
+dashboard_state: present

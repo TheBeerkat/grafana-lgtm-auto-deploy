@@ -1,0 +1,13 @@
+- name: Add the Mimir repository to helm
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+
+- name: Deploy Mimir with helm
+  kubernetes.core.helm:
+    name: mimir
+    chart_ref: grafana/mimir-distributed
+    chart_version: 6.0.6
+    values: "{{ lookup('template', 'values.yml') | from_yaml }}"
+    release_namespace: monitoring
+    create_namespace: true

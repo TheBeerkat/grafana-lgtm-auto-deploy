@@ -1,0 +1,13 @@
+- name: Add the Loki repository to helm
+  kubernetes.core.helm_repository:
+    name: grafana-community
+    repo_url: https://grafana-community.github.io/helm-charts
+
+- name: Deploy Loki with helm
+  kubernetes.core.helm:
+    name: loki
+    chart_ref: grafana-community/loki
+    chart_version: 18.1.1
+    values: "{{ lookup('template', 'values.yml') | from_yaml }}"
+    release_namespace: monitoring
+    create_namespace: true

@@ -1,0 +1,9 @@
+- name: Deploy Loki
+  ansible.builtin.include_tasks:
+    file: "deploy.yml"
+  when: not loki_uninstall
+
+- name: Uninstall Loki
+  ansible.builtin.include_tasks:
+    file: "uninstall.yml"
+  when: loki_uninstall

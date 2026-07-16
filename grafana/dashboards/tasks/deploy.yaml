@@ -1,0 +1,10 @@
+---
+
+- name: Import local JSON dashboards to Grafana
+  grafana.grafana.dashboard:
+    grafana_url: "{{ grafana_url }}"
+    grafana_api_key: "{{ grafana_api_key }}"
+    dashboard: "{{ lookup('file', item) | from_json }}"
+    state: present
+  with_fileglob:
+    - "*.json"

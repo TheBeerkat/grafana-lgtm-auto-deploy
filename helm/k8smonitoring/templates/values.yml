@@ -1,0 +1,82 @@
+---
+cluster:
+  name: minikube
+
+destinations:
+  prometheus:
+    type: prometheus
+    url: http://mimir-gateway.monitoring.svc.cluster.local:80/api/v1/push
+    tenantId: "infra"
+
+  loki:
+    type: loki
+    url: http://loki-gateway.monitoring.svc.cluster.local:80/loki/api/v1/push
+    tenantId: "infra"
+
+  Tempo:
+    type: otlp
+    url: http://tempo-distributor.monitoring.svc.cluster.local:4317
+    tenantId: "infra"
+    tls:
+      insecure: true # TODO: false
+      insecureSkipVerify: true
+      metrics: {enabled: true}
+      logs: {enabled: false}
+      traces: {enabled: false}
+
+clusterMetrics:
+  enabled: true
+  collector: alloy-metrics
+
+annotationAutodiscovery:
+  enabled: true
+  collector: alloy-metrics
+  
+hostMetrics:
+  enabled: true
+  collector: alloy-metrics
+  linuxHosts:
+    enabled: true
+
+
+clusterEvents:
+  enabled: true
+  collector: alloy-singleton
+
+podLogsViaLoki:
+  enabled: true
+  collector: alloy-logs
+
+
+applicationObservability:
+  enabled: true
+  collector: alloy-receiver
+  receivers:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+    logs:
+      enabled: false
+
+
+collectors:
+  alloy-metrics:
+    presets: [clustered, statefulset]
+
+  alloy-singleton: 
+    presets: [singleton]
+
+  alloy-logs:
+    presets: [filesystem-log-reader, daemonset]
+
+  alloy-receiver:
+    presets: [deployment]
+
+telemetryServices:
+  kube-state-metrics:
+    deploy: true
+  node-exporter:
+    deploy: true
+

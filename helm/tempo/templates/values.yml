@@ -1,0 +1,24 @@
+storage:
+  trace:
+    backend: s3
+    s3:
+      access_key: {{ access_key }}
+      secret_key: {{ secret_key }}
+      bucket: {{ bucket }}
+      endpoint: {{ endpoint }}
+      insecure: {{ insecure }}
+
+traces:
+  otlp:
+    grpc:
+      enabled: {{ otlp_grpc }}
+    http:
+      enabled: {{ otlp_http }}
+    zipkin:
+      enabled: {{ zipkin }}
+    jaeger:
+      thriftHttp:
+        enabled: {{ jaeger_http }}
+
+metricsGenerator:
+  enabled: true

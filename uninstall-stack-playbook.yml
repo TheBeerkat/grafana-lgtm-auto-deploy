@@ -1,0 +1,46 @@
+- name: uninstall the lgtm stack from k8s
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: uninstall loki
+      ansible.builtin.include_role:
+        name: "./helm/loki"
+      vars:
+        loki_uninstall: true
+
+    - name: uninstall grafana
+      ansible.builtin.include_role:
+        name: "./helm/grafana"
+      vars:
+        grafana_uninstall: true
+
+    - name: uninstall tempo
+      ansible.builtin.include_role:
+        name: "./helm/tempo"
+      vars:
+        tempo_uninstall: true
+
+    - name: uninstall mimir
+      ansible.builtin.include_role:
+        name: "./helm/mimir"
+      vars:
+        mimir_uninstall: true
+
+    - name: uninstall k8smonitoring
+      ansible.builtin.include_role:
+        name: "./helm/k8smonitoring"
+      vars:
+        k8smonitoring_uninstall: true
+
+    - name: remove namespace
+      kubernetes.core.k8s:
+        state: absent
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: monitoring
+
+
+

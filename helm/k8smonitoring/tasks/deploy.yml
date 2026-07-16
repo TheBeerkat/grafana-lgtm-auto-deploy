@@ -1,0 +1,13 @@
+- name: Add the k8smonitoring repository to helm
+  kubernetes.core.helm_repository:
+    name: grafana
+    repo_url: https://grafana.github.io/helm-charts
+
+- name: Deploy k8smonitoring with helm
+  kubernetes.core.helm:
+    name: k8smonitoring
+    chart_ref: grafana/k8s-monitoring 
+    chart_version: 4.2.0
+    values: "{{ lookup('template', 'values.yml') | from_yaml }}"
+    release_namespace: monitoring
+    create_namespace: true

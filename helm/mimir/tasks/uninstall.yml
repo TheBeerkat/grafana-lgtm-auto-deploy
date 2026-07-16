@@ -1,0 +1,5 @@
+- name: Uninstall Mimir with helm
+  kubernetes.core.helm:
+    name: mimir
+    release_namespace: monitoring
+    state: absent

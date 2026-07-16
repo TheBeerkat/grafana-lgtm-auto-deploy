@@ -1,0 +1,83 @@
+- name: Deploy the LGTM stack on kubernetes
+  hosts: localhost
+  connection: local
+  vars:
+    object_store_access_key: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ACCESS_KEY') }}"
+    object_store_secret_access_key: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_SECRET_ACCESS_KEY') }}"
+    object_store_endpoint: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ENDPOINT') }}"
+
+  tasks:
+    - name: Deploy Loki
+      ansible.builtin.include_role:
+        name: "./helm/loki"
+      vars:
+        chunk_bucket: "loki-chunk"
+        ruler_bucket: "loki-ruler"
+        admin_bucket: "loki-admin"
+        endpoint: "http://{{object_store_endpoint}}"
+        access_key: "{{ object_store_access_key }}"
+        secret_access_key: "{{ object_store_secret_access_key }}"
+        allow_insecure_http: false
+        replicas: 3
+        maxunavailable: 1
+
+    - name: Deploy Grafana
+      ansible.builtin.include_role:
+        name: "./helm/grafana"
+      vars:
+        persistence: true
+
+    - name: Deploy Tempo
+      ansible.builtin.include_role:
+        name: "./helm/tempo"
+      vars:
+        access_key: "{{ object_store_access_key }}"
+        secret_key: "{{ object_store_secret_access_key }}"
+        bucket: "tempo"
+        endpoint: "{{ object_store_endpoint }}"
+        insecure: false
+        otlp_grpc: true
+        otlp_http: true
+        zipkin: false
+        jaeger_http: false
+
+    - name: Deploy Mimir
+      ansible.builtin.include_role:
+        name: "./helm/mimir"
+      vars:
+        endpoint: "{{ object_store_endpoint }}"
+        secret_access_key: "{{ object_store_secret_access_key }}"
+        access_key: "{{ object_store_access_key }}"
+        blocks_bucket: "mimir-blocks"
+        alertmanager_bucket: "mimir-alertmanager"
+        ruler_bucket: "mimir-ruler"
+        insecure: false
+
+    - name: Deploy k8smonitoring
+      ansible.builtin.include_role:
+        name: "./helm/k8smonitoring"
+
+    - name: Add Grafana Ingress
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            creationTimestamp: null
+            name: grafana
+            namespace: monitoring
+          spec:
+            ingressClassName: nginx
+            rules:
+              - host: localhost
+                http:
+                  paths:
+                    - backend:
+                        service:
+                          name: grafana
+                          port:
+                            number: 80
+                      path: /
+                      pathType: Prefix
+          status:
+            loadBalancer: {}

@@ -1,0 +1,10 @@
+tempo_uninstall: false
+access_key: ""
+secret_key: ""
+bucket: ""
+endpoint: ""
+insecure: false
+otlp_grpc: true
+otlp_http: true
+zipkin: false
+jaeger_http: false

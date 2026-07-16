@@ -1,0 +1,15 @@
+- name: Add the ingress nginx repository to helm
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+
+- name: Deploy ingress nginx with helm
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    chart_version: 4.15.0
+    set_values:
+      - value: controller.service.type=NodePort
+        value_type: string
+    release_namespace: ingress-nginx
+    create_namespace: true

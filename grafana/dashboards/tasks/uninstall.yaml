@@ -1,0 +1,12 @@
+---
+
+- name: Remove local JSON dashboards from Grafana
+  grafana.grafana.dashboard:
+    grafana_url: "{{ grafana_url }}"
+    grafana_api_key: "{{ grafana_api_key }}"
+    # Pass a dict containing just the UID from the file
+    dashboard:
+      uid: "{{ (lookup('file', item) | from_json).uid }}"
+    state: absent
+  with_fileglob:
+    - "*.json"

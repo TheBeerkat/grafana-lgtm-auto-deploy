@@ -1,0 +1,5 @@
+- name: Uninstall Tempo with helm
+  kubernetes.core.helm:
+    name: tempo
+    release_namespace: monitoring
+    state: absent

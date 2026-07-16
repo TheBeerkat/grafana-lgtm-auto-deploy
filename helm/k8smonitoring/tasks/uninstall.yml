@@ -1,0 +1,5 @@
+- name: Uninstall k8smonitoring with helm
+  kubernetes.core.helm:
+    name: k8smonitoring
+    release_namespace: monitoring
+    state: absent
