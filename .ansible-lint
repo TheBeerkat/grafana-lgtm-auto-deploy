@@ -1,0 +1,16 @@
+---
+profile: min
+
+skip_list:
+  - yaml[line-length]
+  - name[template]
+  - no-changed-when
+
+warn_list:
+  - experimental
+  - role-name
+
+exclude_paths:
+  - .git/
+  - demo/
+  - helm/*/templates/

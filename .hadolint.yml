@@ -1,0 +1,9 @@
+---
+ignored:
+  - DL3008
+  - DL3018
+
+trustedRegistries:
+  - docker.io
+  - eclipse-temurin
+  - maven

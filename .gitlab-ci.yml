@@ -1,0 +1,72 @@
+---
+stages:
+  - lint
+  - validate
+  - security
+
+default:
+  image: python:3.12-slim
+  before_script:
+    - pip install --quiet yamllint ansible-lint ansible-core
+
+# ---------------------------------------------------------------------------
+# Lint stage
+# ---------------------------------------------------------------------------
+
+yaml-lint:
+  stage: lint
+  script:
+    - yamllint -c .yamllint .
+
+ansible-lint:
+  stage: lint
+  script:
+    - ansible-lint deploy-stack-playbook.yml uninstall-stack-playbook.yml helm/ grafana/
+
+dockerfile-lint:
+  stage: lint
+  image: hadolint/hadolint:latest-debian
+  script:
+    - hadolint demo/Dockerfile
+
+# ---------------------------------------------------------------------------
+# Validate stage
+# ---------------------------------------------------------------------------
+
+ansible-syntax:
+  stage: validate
+  script:
+    - ansible-playbook --syntax-check deploy-stack-playbook.yml
+    - ansible-playbook --syntax-check uninstall-stack-playbook.yml
+
+k8s-validate:
+  stage: validate
+  image:
+    name: ghcr.io/yannh/kubeconform:latest-alpine
+    entrypoint: [""]
+  script:
+    - |
+      find PV/ demo/k8s/ -name '*.yml' -o -name '*.yaml' | while read -r f; do
+        echo "Validating $f ..."
+        kubeconform -strict -summary "$f"
+      done
+
+# ---------------------------------------------------------------------------
+# Security stage
+# ---------------------------------------------------------------------------
+
+config-scan:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy config --severity HIGH,CRITICAL --exit-code 1 .
+
+secret-scan:
+  stage: security
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --verbose --redact
