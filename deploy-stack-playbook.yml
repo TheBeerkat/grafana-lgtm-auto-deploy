@@ -5,6 +5,9 @@
     object_store_access_key: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ACCESS_KEY') }}"
     object_store_secret_access_key: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_SECRET_ACCESS_KEY') }}"
     object_store_endpoint: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ENDPOINT') }}"
+    object_store_allow_insecure: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ALLOW_INSECURE') }}"
+    grafana_url: "{{ lookup('ansible.builtin.env', 'GRAFANA_URL') }}"
+    grafana_api_key: "{{ lookup('ansible.builtin.env', 'GRAFANA_API_KEY') }}"
 
   tasks:
     - name: Deploy Loki
@@ -17,7 +20,7 @@
         endpoint: "http://{{object_store_endpoint}}"
         access_key: "{{ object_store_access_key }}"
         secret_access_key: "{{ object_store_secret_access_key }}"
-        allow_insecure_http: false
+        allow_insecure_http: "{{ object_store_allow_insecure }}"
         replicas: 3
         maxunavailable: 1
 
@@ -35,7 +38,7 @@
         secret_key: "{{ object_store_secret_access_key }}"
         bucket: "tempo"
         endpoint: "{{ object_store_endpoint }}"
-        insecure: false
+        insecure: "{{ object_store_allow_insecure }}"
         otlp_grpc: true
         otlp_http: true
         zipkin: false
@@ -51,11 +54,18 @@
         blocks_bucket: "mimir-blocks"
         alertmanager_bucket: "mimir-alertmanager"
         ruler_bucket: "mimir-ruler"
-        insecure: false
+        insecure: "{{ object_store_allow_insecure }}"
 
     - name: Deploy k8smonitoring
       ansible.builtin.include_role:
         name: "./helm/k8smonitoring"
+
+    - name: Import Grafana Dashboards
+      ansible.builtin.include_role:
+        name: "./grafana/dashboards"
+      vars:
+        grafana_url: "{{ grafana_url }}"
+        grafana_api_key: "{{ grafana_api_key }}"
 
     - name: Add Grafana Ingress
       kubernetes.core.k8s:

@@ -1,3 +1,12 @@
+- name: Validate required Tempo variables
+  ansible.builtin.assert:
+    that:
+      - access_key | length > 0
+      - secret_key | length > 0
+      - endpoint | length > 0
+      - bucket | length > 0
+    fail_msg: "Missing required Tempo variables (access_key, secret_key, endpoint, bucket). Check your .env or playbook vars."
+
 - name: Add the Tempo repository to helm
   kubernetes.core.helm_repository:
     name: grafana-community

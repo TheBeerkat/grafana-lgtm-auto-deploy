@@ -1,3 +1,9 @@
+- name: Validate Grafana variables
+  ansible.builtin.assert:
+    that:
+      - persistence is defined
+    fail_msg: "Grafana 'persistence' variable is not set."
+
 - name: Add the Grafana repository to helm
   kubernetes.core.helm_repository:
     name: grafana-community

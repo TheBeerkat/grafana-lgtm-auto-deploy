@@ -1,3 +1,9 @@
+- name: Validate k8smonitoring variables
+  ansible.builtin.assert:
+    that:
+      - cluster is not defined or cluster.name is defined
+    fail_msg: "k8smonitoring cluster.name should be set in values template."
+
 - name: Add the k8smonitoring repository to helm
   kubernetes.core.helm_repository:
     name: grafana
