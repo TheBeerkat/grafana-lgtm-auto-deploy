@@ -1,0 +1,8 @@
+- name: Deploy the ingress nginx controller
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Deploy ingress nginx
+      ansible.builtin.include_role:
+        name: "./helm/nginx"

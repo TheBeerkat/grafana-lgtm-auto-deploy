@@ -1,4 +1,4 @@
-- name: Deploy ingerss nginx
+- name: Deploy ingress nginx
   ansible.builtin.include_tasks:
     file: "deploy.yml"
   when: not ingress_nginx_uninstall
