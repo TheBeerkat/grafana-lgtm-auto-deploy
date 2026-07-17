@@ -1,5 +1,5 @@
-- name: Uninstall Grafana with helm
+- name: Uninstall Ingress Nginx with helm
   kubernetes.core.helm:
-    name: grafana
+    name: ingress-nginx
     release_namespace: monitoring
     state: absent
