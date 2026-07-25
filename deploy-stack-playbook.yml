@@ -6,8 +6,6 @@
     object_store_secret_access_key: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_SECRET_ACCESS_KEY') }}"
     object_store_endpoint: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ENDPOINT') }}"
     object_store_allow_insecure: "{{ lookup('ansible.builtin.env', 'OBJECT_STORE_ALLOW_INSECURE') }}"
-    grafana_url: "{{ lookup('ansible.builtin.env', 'GRAFANA_URL') }}"
-    grafana_api_key: "{{ lookup('ansible.builtin.env', 'GRAFANA_API_KEY') }}"
 
   tasks:
     - name: Deploy Loki
@@ -59,13 +57,6 @@
     - name: Deploy k8smonitoring
       ansible.builtin.include_role:
         name: "./helm/k8smonitoring"
-
-    - name: Import Grafana Dashboards
-      ansible.builtin.include_role:
-        name: "./grafana/dashboards"
-      vars:
-        grafana_url: "{{ grafana_url }}"
-        grafana_api_key: "{{ grafana_api_key }}"
 
     - name: Add Grafana Ingress
       kubernetes.core.k8s:

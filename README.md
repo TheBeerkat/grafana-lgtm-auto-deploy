@@ -151,6 +151,14 @@ kubectl get pods -n monitoring
 
 You should see pods for loki, grafana, tempo, mimir, and k8s-monitoring (alloy agents, kube-state-metrics, node-exporter).
 
+### Importing Dashboards
+
+After Grafana is running and you have an API key, import the dashboards:
+
+```bash
+ansible-playbook deploy-dashboards-playbook.yml
+```
+
 ## Instrumenting a Spring Application
 
 To integrate an existing Spring Boot application with this monitoring stack, you need to expose **metrics** (Prometheus), **traces** (OTLP), and **logs** (stdout).
@@ -204,7 +212,7 @@ management:
       probability: 1.0
   otlp:
     tracing:
-      endpoint: http://alloy-receiver.monitoring.svc.cluster.local:4318/v1/traces
+      endpoint: http://k8smonitoring-alloy-receiver.monitoring.svc.cluster.local:4318/v1/traces
   metrics:
     tags:
       application: ${spring.application.name}
