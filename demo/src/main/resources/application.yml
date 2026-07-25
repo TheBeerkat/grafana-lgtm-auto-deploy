@@ -6,10 +6,20 @@ management:
     web:
       exposure:
         # Expose health, standard metrics, and prometheus endpoints
-        include: health, metrics, prometheus
+        # include: health, metrics, prometheus
+        include: '*'
   endpoint:
     health:
       show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://k8smonitoring-alloy-receiver.monitoring.svc.cluster.local:4318/v1/traces
+
   metrics:
     tags:
       application: ${spring.application.name}
