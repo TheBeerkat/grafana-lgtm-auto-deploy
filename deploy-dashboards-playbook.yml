@@ -1,0 +1,11 @@
+- name: Import dashboards into Grafana
+  hosts: localhost
+  connection: local
+  vars:
+    grafana_url: "{{ lookup('ansible.builtin.env', 'GRAFANA_URL') }}"
+    grafana_api_key: "{{ lookup('ansible.builtin.env', 'GRAFANA_API_KEY') }}"
+
+  tasks:
+    - name: Import Grafana Dashboards
+      ansible.builtin.include_role:
+        name: "./grafana/dashboards"

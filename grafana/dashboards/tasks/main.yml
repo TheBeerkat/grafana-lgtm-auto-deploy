@@ -1,0 +1,14 @@
+---
+
+# - name: Route to deploy or uninstall based on dashboard_state
+#   ansible.builtin.include_tasks: "{{ 'deploy.yml' if dashboard_state == 'present' else 'uninstall.yml' }}"
+
+- name: Deploy Grafana Dashboard
+  ansible.builtin.include_tasks:
+    file: "deploy.yml"
+  when: dashboard_state == 'present'
+
+- name: Uninstall Grafana Dashboard
+  ansible.builtin.include_tasks:
+    file: "uninstall.yml"
+  when: dashboard_state != 'present'
