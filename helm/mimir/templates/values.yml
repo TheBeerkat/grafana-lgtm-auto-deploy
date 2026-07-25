@@ -11,6 +11,8 @@ mimir:
           secret_access_key: {{ secret_access_key }}
           access_key_id: {{ access_key }}
           insecure: {{ insecure }}
+          bucket_lookup_type: path
+
 
     blocks_storage:
       s3:

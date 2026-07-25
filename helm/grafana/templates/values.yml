@@ -16,7 +16,7 @@ datasources:
           httpHeaderName1: "X-Scope-OrgID"
         secureJsonData:
           httpHeaderValue1: "infra"
-          
+
       - name: Loki
         type: loki
         url: http://loki-gateway.monitoring.svc.cluster.local
@@ -25,13 +25,27 @@ datasources:
           httpHeaderName1: "X-Scope-OrgID"
         secureJsonData:
           httpHeaderValue1: "infra"
-          
+
       - name: Tempo
         type: tempo
         url: http://tempo-query-frontend.monitoring.svc.cluster.local:3200
         access: proxy
         jsonData:
           httpHeaderName1: "X-Scope-OrgID"
+          tracesToLogs:
+            datasourceUid: Loki
+            filterByTraceID: true
+            filterBySpanID: true
+          tracesToMetrics:
+            datasourceUid: Mimir
+          serviceMap:
+            datasourceUid: Mimir
+          search:
+            datasourceUid: Tempo
+          traceQuery:
+            timeShiftEnabled: true
+            spanStartTimeShift: "-30m"
+            spanEndTimeShift: "30m"
         secureJsonData:
           httpHeaderValue1: "infra"
 

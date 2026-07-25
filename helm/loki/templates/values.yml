@@ -33,7 +33,7 @@ loki:
       endpoint: {{ endpoint }}
       secretAccessKey: {{ secret_access_key }}
       accessKeyId: {{ access_key }}
-      s3ForcePathStyle: true # Leave this as false breaks kubernetes internal dns resolution
+      s3forcepathstyle: true # Leave this as false breaks kubernetes internal dns resolution
       insecure: {{ allow_insecure_http }}
       http_config: {}
 

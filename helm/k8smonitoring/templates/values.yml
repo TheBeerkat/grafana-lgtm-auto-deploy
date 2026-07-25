@@ -13,16 +13,16 @@ destinations:
     url: http://loki-gateway.monitoring.svc.cluster.local:80/loki/api/v1/push
     tenantId: "infra"
 
-  Tempo:
+  tempo:
     type: otlp
     url: http://tempo-distributor.monitoring.svc.cluster.local:4317
     tenantId: "infra"
     tls:
       insecure: true # TODO: false
       insecureSkipVerify: true
-      metrics: {enabled: true}
-      logs: {enabled: false}
-      traces: {enabled: false}
+    metrics: {enabled: true}
+    logs: {enabled: true}
+    traces: {enabled: true}
 
 clusterMetrics:
   enabled: true
@@ -31,7 +31,7 @@ clusterMetrics:
 annotationAutodiscovery:
   enabled: true
   collector: alloy-metrics
-  
+
 hostMetrics:
   enabled: true
   collector: alloy-metrics
@@ -65,18 +65,17 @@ collectors:
   alloy-metrics:
     presets: [clustered, statefulset]
 
-  alloy-singleton: 
+  alloy-singleton:
     presets: [singleton]
 
   alloy-logs:
     presets: [filesystem-log-reader, daemonset]
 
   alloy-receiver:
-    presets: [deployment]
+    presets: [daemonset]
 
 telemetryServices:
   kube-state-metrics:
     deploy: true
   node-exporter:
     deploy: true
-
