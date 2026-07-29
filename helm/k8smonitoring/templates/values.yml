@@ -27,7 +27,10 @@ destinations:
 clusterMetrics:
   enabled: true
   collector: alloy-metrics
-
+  cadvisor:
+    metricsTuning:
+      useDefaultAllowList: false
+         
 annotationAutodiscovery:
   enabled: true
   collector: alloy-metrics
@@ -37,7 +40,8 @@ hostMetrics:
   collector: alloy-metrics
   linuxHosts:
     enabled: true
-
+    metricsTuning:
+      useIntegrationAllowList: true
 
 clusterEvents:
   enabled: true
