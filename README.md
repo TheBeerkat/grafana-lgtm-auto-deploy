@@ -22,8 +22,9 @@ Everything deploys into the `monitoring` namespace. The ingress-nginx controller
 | Tool | Minimum Version | Purpose |
 |------|-----------------|---------|
 | [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/) | 2.15+ | Playbook orchestration |
+| [Python](https://www.python.org/) | 3.9+ | Required by the Kubernetes Python client |
 | [kubectl](https://kubernetes.io/docs/tasks/tools/) | 1.25+ | Kubernetes API access |
-| [Helm](https://helm.sh/docs/intro/install/) | 3.12+ | Chart deployment |
+| [Helm](https://helm.sh/docs/intro/install/) | 3.12+ (< 4.x) | Chart deployment |
 | [Docker](https://docs.docker.com/get-docker/) or Podman | any | Building the demo app image |
 
 ### Required Ansible Collections
@@ -32,9 +33,26 @@ Everything deploys into the `monitoring` namespace. The ingress-nginx controller
 ansible-galaxy collection install kubernetes.core grafana.grafana
 ```
 
+### Required Python Dependencies
+
+The Ansible modules used by the playbooks require the following Python packages on the control machine (where you run `ansible-playbook`):
+
+```bash
+pip install kubernetes>=24.2.0 PyYAML>=3.11 jsonpatch requests
+```
+
+| Package | Minimum Version | Required By |
+|---------|-----------------|-------------|
+| `kubernetes` | 24.2.0 | `kubernetes.core.k8s`, `kubernetes.core.helm`, `kubernetes.core.helm_repository` |
+| `PyYAML` | 3.11 | `kubernetes.core.helm`, `kubernetes.core.helm_repository` |
+| `jsonpatch` | any | `kubernetes.core.k8s` |
+| `requests` | 1.0.0 | `grafana.grafana.dashboard` |
+
+> `requests` and `PyYAML` are often installed as transitive dependencies of `ansible` itself, but `kubernetes` and `jsonpatch` are **not** — they must be installed explicitly on a fresh system.
+
 ### Kubernetes Cluster
 
-- **Minimum version:** 1.25 (1.28+ recommended)
+- **Minimum version:** 1.25 
 - **Dynamic volume provisioning** must be available for Grafana persistence and Loki/Tempo/Mimir components that use PVCs.
 - A local cluster such as Minikube works for development. Ensure it has sufficient resources:
   ```bash
@@ -44,11 +62,10 @@ ansible-galaxy collection install kubernetes.core grafana.grafana
 
 ## Object Store Setup
 
-Loki, Tempo, and Mimir all store data in S3-compatible object storage. Any S3-compatible service works — this could be MinIO, Ceph, SeaweedFS, or a cloud provider's S3 API.
+Loki, Tempo, and Mimir all store data in S3-compatible object storage. Any S3-compatible service works, this could be MinIO, Ceph, SeaweedFS, or a cloud provider's S3 API.
 
 The deploy script creates the following buckets automatically: `loki-chunk`, `loki-ruler`, `loki-admin`, `tempo`, `mimir-blocks`, `mimir-alertmanager`, `mimir-ruler`.
 
-### Option A: External Object Store
 
 Point the stack at your existing S3-compatible endpoint:
 
@@ -61,27 +78,6 @@ export OBJECT_STORE_ENDPOINT="<your-endpoint-hostname>"
 The endpoint should be the hostname only (e.g. `minio.example.com`, `s3.us-east-1.amazonaws.com`). Do not include the `https://` prefix.
 
 If your endpoint uses plain HTTP (no TLS), set `allow_insecure_http: true` and `insecure: true` in the Loki, Tempo, and Mimir role defaults under `helm/`.
-
-### Option B: Local MinIO (Development)
-
-For local development, MinIO manifests are provided in `PV/Cs/`. Deploy them first:
-
-```bash
-kubectl apply -f PV/Cs/minio/minio-secret.yml
-kubectl apply -f PV/Cs/minio/minio-pvc.yml
-kubectl apply -f PV/Cs/minio/minio-service.yml
-kubectl apply -f PV/Cs/minio/minio-statefulset.yml
-```
-
-Then set your environment to point at MinIO:
-
-```bash
-export OBJECT_STORE_ACCESS_KEY="admin"
-export OBJECT_STORE_SECRET_ACCESS_KEY="toortoor"
-export OBJECT_STORE_ENDPOINT="minio.minio.svc.cluster.local:9000"
-```
-
-> The bundled MinIO uses hardcoded dev credentials and HTTP. Set the insecure flags mentioned above.
 
 ## Environment Configuration
 
@@ -143,7 +139,7 @@ Grafana comes pre-configured with three datasources:
 
 ### Verify the Stack
 
-Check that all pods are running:
+Check that pods are running:
 
 ```bash
 kubectl get pods -n monitoring
@@ -153,7 +149,7 @@ You should see pods for loki, grafana, tempo, mimir, and k8s-monitoring (alloy a
 
 ### Importing Dashboards
 
-After Grafana is running and you have an API key, import the dashboards:
+After Grafana is running and you have an API key (which you get by creating a service account), import the dashboards:
 
 ```bash
 ansible-playbook deploy-dashboards-playbook.yml
@@ -187,8 +183,6 @@ Add these to your `pom.xml`:
     <artifactId>opentelemetry-exporter-otlp</artifactId>
 </dependency>
 ```
-
-For Gradle builds, use the equivalent `implementation` / `runtimeOnly` declarations.
 
 ### 2. Configure Actuator Endpoints
 
@@ -226,7 +220,7 @@ management:
 
 Key points:
 - `management.otlp.tracing.endpoint` points to the k8s-monitoring Alloy receiver service. This is how traces reach Tempo.
-- `management.tracing.sampling.probability: 1.0` traces every request. Lower this in production.
+- `management.tracing.sampling.probability: 1.0` traces every request. **Lower this in production**.
 - SLO buckets and percentile histograms give you useful latency panels in Grafana.
 
 ### 3. Add Kubernetes Deployment Annotations
@@ -294,8 +288,8 @@ Set `imagePullPolicy: Never` in your deployment if using Minikube's local Docker
 ### 5. Deploy
 
 ```bash
-kubectl apply -f your-deployment.yaml
-kubectl apply -f your-service.yaml
+kubectl apply -f your-deployment.yaml -n your-namespace
+kubectl apply -f your-service.yaml -n your-namespace
 ```
 
 ### 6. Verify
@@ -325,10 +319,7 @@ helm uninstall ingress-nginx -n ingress-nginx
 
 ```bash
 # Port-forward Grafana
-kubectl port-forward svc/grafana -n monitoring 80:80
-
-# Port-forward MinIO console (if using local MinIO)
-kubectl port-forward svc/minio -n minio 9001:9001
+kubectl port-forward svc/grafana -n monitoring 8080:80
 
 # Run the traffic generator against the demo app
 ./traffic_generator.sh
@@ -345,5 +336,3 @@ kubectl logs -l app.kubernetes.io/name=loki -n monitoring
 # Check Alloy agent logs
 kubectl logs -l app.kubernetes.io/name=k8s-monitoring-alloy -n monitoring
 ```
-
-## Known Issues

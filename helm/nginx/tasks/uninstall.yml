@@ -1,5 +1,5 @@
 - name: Uninstall Ingress Nginx with helm
   kubernetes.core.helm:
     name: ingress-nginx
-    release_namespace: monitoring
+    release_namespace: ingress-nginx
     state: absent

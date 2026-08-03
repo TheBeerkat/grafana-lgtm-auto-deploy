@@ -46,7 +46,7 @@ k8s-validate:
     entrypoint: [""]
   script:
     - |
-      find PV/ demo/k8s/ -name '*.yml' -o -name '*.yaml' | while read -r f; do
+      find minio/ minio/minio/ demo/k8s/ -name '*.yml' -o -name '*.yaml' | while read -r f; do
         echo "Validating $f ..."
         kubeconform -strict -summary "$f"
       done
